@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ATAR calculator</title>
+
+  <link href="css/navbar-fixed-top.css" rel="stylesheet">
+
+  <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+<!-- <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"> -->
+
+<link href="https://cdn.datatables.net/v/bs5/dt-1.13.3/datatables.min.css" rel="stylesheet"/>
+
+<script src="https://cdn.datatables.net/v/bs5/dt-1.13.3/datatables.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+<!-- <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap.min.js"></script> -->
+
+  <script>
+    $(document).ready(function() {
+
+        //const data_payload = [] ;
+        var hsclasses;
+        var year_var = 2022 ;
+        //var json_file = year_var + '.json';
+
+        $.getJSON('src/2022.json', function(data) {
+
+            hsclasses = data['hsclasses'][0] ;         
+
+        //console.log('<div class="row row_pad"><div class="col-md-4 col-xs-4 col-lg-4 col-sm-4 text-center"><select id="class" name="class" class="form-control" onchange="getAgg(this.form, ' + data_payload['hsclasses'] + ',">)');
+            //var gfg = JSON.stringify(data);
+
+        var select = '';
+        for (var i = 1; i <= 8; i++) {
+            //console.log(i);
+            select += '<div class="row row_pad"><div class="col-md-4 col-xs-4 col-lg-4 col-sm-4 text-center"><select id="class' + i + '" name="class' + i + '" class="form-control" onchange="getAgg(this.form,' + year_var + ',' + i +' )">' + 
+                    '<option value="">Select Subject</option></select></div>' + 
+                '<div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="number" id="raw' + i + '" name="raw' + i + '" min="0" max="50" class="rawScore" onchange="getAgg(this.form, 2022, 0)" style="text-align:center;"></div>' + 
+                '<div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text" id="class' + i + 'result" name="class' + i + 'result" disabled="disabled" style="text-align:center;" size="3"/></div>' +
+                //'<div class="col-md-0 col-xs-0 col-lg-0 col-sm-0"><label type="hidden" class="sr-only" id="scaling' + i + '">+0</label></div>' +
+                '<div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text" id="used_as' + i + 'result" name="used_as' + i + 'result" disabled="disabled" style="text-align:center;" size="3"/></div>' +
+                '<div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text" id="agg_contribution' + i + 'result" name="agg_contribution' + i + 'result" disabled="disabled" style="text-align:center;" size="3"/></div>' +
+                '</div>' ;
+   
+        };
+
+        //console.log(hsclasses);
+        var count = Object.keys(hsclasses).length;
+        //console.log(count);
+        //console.log(data['hsclasses'].length);
+        
+        $('#main').html(select);
+
+        for (var j = 1; j <=8 ; j++) {
+            var selectElement = $('#class' + j);
+            if (j==1) {
+                selectElement.append($('<option>', {value: 'EN', text: 'English'}));
+                selectElement.append($('<option>', {value: 'EF', text: 'English (EAL)'}));
+                selectElement.append($('<option>', {value: 'EG', text: 'English Language'}));
+                selectElement.append($('<option>', {value: 'LI', text: 'Literature'}));
+            } else {
+
+
+            for (var key in hsclasses) {
+                //console.log(hsclasses[key].name)
+                selectElement.append($('<option>', {
+                    value: key,
+                    text: hsclasses[key].name
+                }));
+            }
+        }
+        }
+
+    });
+
+    $.getJSON('js/course_details.json', function(courses) {
+      console.log(courses[0]);
+
+      $('#oTable').dataTable({
+        order: [[4, "desc" ]] ,
+        lengthMenu: [ 25, 50, 75, 100 ],
+        processing : true ,
+        data : courses,
+        columnDefs: [   
+            {targets : [2], searchable:false },
+            {targets : [4], visible: false },
+            {targets: [3], render: function ( data, type, row ) {
+                if (data == 0) { return data //'L/N'
+            } 
+                else if (data == 1) {return 'N/P'} 
+                else {return data} 
+            }},
+            {targets: [5],
+                render: function ( data, type, row ) {
+                return '<a href="' + row[5] + '" target="_blank">View Course Details</a>';
+            }  
+        } 
+    ]
+	} );
+
+    })
+
+
+
+
+});
+
+
+
+  </script>
+</head>
+<body>
+
+<h2 class="text-center" id="list_heading">Calculate your ATAR</h2><BR>
+   
+    <div class="container" role="form" id="calculator_form">
+        <div class="row">
+            <div class="row">
+                <div class="col-md-12 col-xs-12 col-lg-12 col-sm-12">
+                    <form class="form-horizontal"  role="form" id="calculator_form">
+                    
+                        <div class="row row_pad">
+                            <div class="col-md-4 col-xs-4 col-lg-4 col-sm-4 text-center"><strong>VCE Subject</strong></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><strong>Raw Score</strong></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><strong>Scaled Score</strong></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><strong>Used As</strong></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><strong>Aggregate Contribution %</strong></div>
+                        </div>
+
+                        <!-- populate this section with jQuery-->
+                        <div id='main'></div>
+
+                        <div class="row row_pad">
+                            <div class="col-md-4 col-xs-4 col-lg-4 col-sm-4 text-center" id="class9" name="class9"><strong>Extension Study Increment:</strong></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="number" id="raw9" name="raw9"  style="text-align:center;" size="3" min="3" max="5" step="0.5" onchange="getAgg(this.form,2022,0)"/></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text" id="class9result" name="class9result" disabled="disabled" style="text-align:center;"/></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text" id="used_as9result" name="used_as9result" disabled="disabled" style="text-align:center;"/></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text" id="agg_contribution9result" name="agg_contribution9result" disabled="disabled" style="text-align:center;"/></div>
+                        </div>
+                        <div class="row row_pad">
+                            <div class="col-md-8 col-xs-8 col-lg-8 col-sm-8 text-center"></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><strong>Aggregate Score:</strong></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text"  disabled="disabled" style="text-align:center;" size="3" id="final_score" value=0.00 /></div>
+                        </div>
+                        <div class="row row_pad">
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><button class="btn" style="background-color:white;color:red;border:1px solid grey" type="reset">Clear Form</button></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><button class="btn" style="background-color:green;color:white;border:1px solid grey" type="button">Calculate</button></div>
+                            <div class="col-md-4 col-xs-4 col-lg-4 col-sm-4 text-center"></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><strong>ATAR:</strong></div>
+                            <div class="col-md-2 col-xs-2 col-lg-2 col-sm-2 text-center"><input class="form-control" type="text"  disabled="disabled" style="text-align:center;" size="3" id="final_atar" value=0.00 /></div>
+                            
+                        </div>
+
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<!-- UNI Courses-->
+
+<h2 class="text-center" id="list_heading">List of Courses</h2><BR>
+        
+    <h4 class="text-center"><strong>Enter Your ATAR</strong></h4>
+    <div class="d-grid gap-2 col-2 mx-auto">
+        <input class="form-control" style="text-align:center;" value="99.95" id="atar_submit" name="atar_submit"></input>
+        <button type="submit" class="btn d-block" style="background-color:white;color:black;border:1px solid grey" id="filter" name="filter">Search For Courses</button>
+        <button type="submit" class="btn d-block" style="background-color:white;color:black;border:1px solid grey"  id="clearFilter" name="clearFilter">Reset Results</button>
+    </div>
+
+
+        <BR>
+
+            <input type ="hidden" id="start" value="0"/>
+            <input  type ="hidden"  id="filterState" value="1"/>
+<!--
+    <input type="hidden" value="0" id="offset" name="offset">
+    <input type="hidden" value="0" id="sort_direction" name="sort_direction">
+    <input type="hidden" value="0" id="sort_cat" name="sort_cat">
+    <input type="hidden" value="" id="limit_by" name="limit_by">
+    <input type ="hidden" value="" id="keyword_value" name="keyword_value">
+    
+
+
+
+<input  type ="hidden"  id="final_atar2" value="0"/>
+<input  type ="hidden"  id="button_select" value="1"/>
+
+
+
+
+    <div id="uni_controls"> </div>
+
+    <div id="uni_courses"> </div>		
+-->
+
+<div class="container"> 
+
+
+<table  id="oTable" class="table table-striped table-bordered">
+<thead><tr><th>Course Name</th><th>Institution</th><th>Location</th><th>Min ATAR</th><th>Adj ATAR</th><th>Course ID</th></tr></thead>
+<tbody><tr><th>Course Name</th><th>Institution</th><th>Location</th><th>Min ATAR</th><th>Adj ATAR</th><th>Course ID</th></tr></tbody>
+</table>				
+</div>
+
+<div align="center">
+
+<!-- VCE ATAR 1 -->
+
+
+</div>
+
+
+<script src="src/calc.js"></script>
+
+<script>
+$(function () {
+    var $tableSel = $('#oTable');
+    var startDate = $('#start').val(), endDate = $('#atar_submit').val();
+    //console.log(endDate);
+    var fState = $('#filterState').val()
+    //var startNew = "0", endNew ="99.95";
+
+     //$('#atar_submit').val($('#final_atar2').val());
+
+    $('#filter').on('click', function (e) {
+        startDate = $('#start').val(); 
+        endDate = $('#atar_submit').val();
+
+      //  e.preventDefault();
+
+//TESTING
+         //$('#atar_submit').val('89');
+         //endDate = $('#atar_submit').val();
+
+        // $('#filterState').val('1');
+        //$.fn.dataTableExt.afnFiltering.length = 0;
+        
+        //console.log(endDate);
+        filterByDate(4, startDate, endDate);
+
+        $tableSel.dataTable().fnDraw();
+
+window.location.href = '#list_heading';
+
+    });
+
+    $('#clearFilter').on('click', function (e) {
+        $.fn.dataTable.ext.search = [];
+
+        //console.log(startDate + "' '" + endDate);
+       //$('#oTable').DataTable().search('').draw();
+        //$('#oTable').dataTable().fnFilter('');
+        //filterByDate(3, '0', '99.95');
+        //$('#oTable').DataTable().search('');
+        $('#oTable').DataTable().search('').draw();
+
+        //  $('#filterState').val('0');
+        console.log("reset");
+        $('#atar_submit').val('99.95');
+        //  $('#final_atar2').val('99.95');
+        //  endDate = $('#atar_submit').val();
+
+
+        // //$.fn.dataTableExt.afnFiltering.length = 0;
+        // console.log(endDate);
+        //filterByDate(4, '0', '100');
+
+        $tableSel.dataTable().fnDraw();
+
+    });
+});
+
+
+var filterByDate = function (column, startD, endD) {
+    // Custom filtering function which will search data in column four between two values
+    $.fn.dataTable.ext.search = [];
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+            var rowDate = parseInt(data[column]), start = parseInt(startD), end = parseInt(endD); 
+            //console.log(data[4]);
+            if (isNaN(endD)) { end = 99.95; }
+            console.log(parseInt(startD) + ' ' + parseInt(endD));
+            //var min = minDate.val();
+            //var max = maxDate.val();
+            //var date = new Date( data[4] );
+    
+            if (start <= rowDate && rowDate <= end) {
+                return true;
+            } else if (rowDate >= start && end === '' && start !== '') {
+                return true;
+            } else if (rowDate <= end && start === '' && end !== '') {
+                return true;
+            } else {
+                return false;
+            } ;
+        }
+    );
+}
+
+var filterByDate_old = function (column, startD, endD) {
+    $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
+
+        //console.log("filter by date");
+       var rowDate = parseInt(aData[column]), start = parseInt(startD), end = parseInt(endD); 
+        
+        if (isNaN(end)) { end = 99.95; }
+        //console.log(end);
+        
+        
+        if (start <= rowDate && rowDate <= end) {
+            return true;
+        } else if (rowDate >= start && end === '' && start !== '') {
+            return true;
+        } else if (rowDate <= end && start === '' && end !== '') {
+            return true;
+        } else {
+            return false;
+        }
+    });
+};
+</script>
+
+</body>
+</html>
+
